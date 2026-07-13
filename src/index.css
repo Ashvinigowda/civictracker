@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;
@@ -7,75 +8,67 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 0 0% 98%;
+    --foreground: 240 10% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 240 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 240 10% 10%;
 
-    --primary: 215 75% 35%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 221 83% 53%; /* Cobalt Blue */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 25% 93%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 40%;
 
-    --accent: 160 55% 40%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 221 83% 53%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 215 75% 35%;
+    --border: 240 5% 90%;
+    --input: 240 5% 90%;
+    --ring: 221 83% 53%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Custom civic tokens */
-    --civic-navy: 215 75% 25%;
-    --civic-blue: 215 75% 35%;
-    --civic-sky: 205 85% 55%;
-    --civic-green: 160 55% 40%;
-    --civic-amber: 38 92% 55%;
-    --civic-red: 0 72% 55%;
-    --civic-light: 210 20% 97%;
-
-    --sidebar-background: 215 75% 25%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 205 85% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 60% 32%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 50% 30%;
-    --sidebar-ring: 205 85% 55%;
+    --civic-amber: 38 92% 50%;
   }
 
   .dark {
-    --background: 215 25% 10%;
-    --foreground: 210 20% 92%;
-    --card: 215 25% 13%;
-    --card-foreground: 210 20% 92%;
-    --popover: 215 25% 13%;
-    --popover-foreground: 210 20% 92%;
-    --primary: 205 85% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 215 25% 18%;
-    --secondary-foreground: 210 20% 92%;
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 15% 55%;
-    --accent: 160 55% 40%;
-    --accent-foreground: 0 0% 100%;
+    --background: 0 0% 4%; /* #0a0a0a */
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 240 5% 12%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 221 83% 53%;
+    --accent-foreground: 210 40% 98%;
+
     --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
-    --ring: 205 85% 55%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 221 83% 53%;
     --sidebar-background: 215 30% 8%;
     --sidebar-foreground: 210 20% 85%;
     --sidebar-primary: 205 85% 55%;
