@@ -16,7 +16,22 @@ export default function ReportIssue() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setPreview(URL.createObjectURL(file));
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const getSafeUrl = (url: string | null) => {
+    if (!url) return undefined;
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.protocol === 'blob:' || parsed.protocol === 'data:') {
+        return parsed.href;
+      }
+    } catch (e) {
+      return undefined;
+    }
+    return undefined;
   };
 
   return (
@@ -82,8 +97,10 @@ export default function ReportIssue() {
                         <motion.img 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          src={preview} 
-                          alt="Preview" 
+                          src={getSafeUrl(preview)}
+                          alt="Preview"
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
                           className="h-full w-full object-cover" 
                         />
                       ) : (

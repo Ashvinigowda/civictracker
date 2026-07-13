@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 
 const Issue = require('./models/Issue');
 const User = require('./models/User');
@@ -12,6 +13,51 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
+
+// ─── Rate limiters ────────────────────────────────────────────────────────────
+
+// Strict limiter for auth endpoints (brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+// Moderate limiter for read endpoints
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+// Moderate limiter for write/update endpoints
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// Validate that a value is a plain string (not a NoSQL operator object)
+function isValidString(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+// Validate email format
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+function isValidEmail(value) {
+  return isValidString(value) && value.length <= 254 && EMAIL_REGEX.test(value);
+}
+
+// Allowlist of valid department roles for filtering
+const VALID_ROLES = ['ADMIN', 'PWD', 'SANITATION', 'WATER', 'ELECTRICITY'];
 
 // simple in‑memory notification store
 
@@ -98,10 +144,20 @@ app.get('/api/notifications', (req, res) => {
 });
 
 // auth routes
-app.post('/api/auth/signup', async (req, res) => {
+// Alert #3 – rate limiting applied; Alert #11 – email sanitized before DB query
+app.post('/api/auth/signup', authLimiter, async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    const existingUser = await User.findOne({ email });
+
+    // Sanitize: reject non-string / operator-injection attempts
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    if (!isValidString(name) || !isValidString(password)) {
+      return res.status(400).json({ error: 'Invalid input' });
+    }
+
+    const existingUser = await User.findOne({ email: String(email) });
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists' });
     }
@@ -111,14 +167,24 @@ app.post('/api/auth/signup', async (req, res) => {
     res.status(201).json({ user: { id: user._id, name: user.name, email: user.email, role: user.role }, token });
   } catch (err) {
     console.error('Signup error:', err);
-    res.status(400).json({ error: err.message || 'Signup failed' });
+    res.status(400).json({ error: 'Signup failed' });
   }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+// Alert #4 – rate limiting applied; Alert #12 – email sanitized before DB query
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+
+    // Sanitize: reject non-string / operator-injection attempts
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+    if (!isValidString(password)) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    const user = await User.findOne({ email: String(email) });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     const match = await user.comparePassword(password);
     if (!match) return res.status(400).json({ error: 'Invalid credentials' });
@@ -130,12 +196,18 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// public endpoint; optionally show all or filter by assigned role if query provided
-app.get('/api/issues', async (req, res) => {
+// Alert #5 – rate limiting applied; Alert #13 – role query param validated against allowlist
+app.get('/api/issues', readLimiter, async (req, res) => {
   try {
     const role = req.query.role;
     let query = {};
-    if (role) query.assignedTo = role;
+    // Only use role in query if it is a known, trusted value
+    if (role !== undefined) {
+      if (!VALID_ROLES.includes(String(role))) {
+        return res.status(400).json({ error: 'Invalid role filter' });
+      }
+      query.assignedTo = String(role);
+    }
     const issues = await Issue.find(query).sort({ createdAt: -1 });
     res.json(issues.map(transformIssue));
   } catch (err) {
@@ -144,7 +216,8 @@ app.get('/api/issues', async (req, res) => {
   }
 });
 
-app.get('/api/issues/:id', async (req, res) => {
+// Alert #6 – rate limiting applied
+app.get('/api/issues/:id', readLimiter, async (req, res) => {
   try {
     const issue = await Issue.findById(req.params.id);
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
@@ -167,7 +240,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.post('/api/issues', upload.single('image'), async (req, res) => {
+app.post('/api/issues', writeLimiter, upload.single('image'), async (req, res) => {
   try {
     const { type, description, location, lat, lng, autoClassify } = req.body;
     let issueData = { type, description, location };
@@ -197,11 +270,12 @@ app.post('/api/issues', upload.single('image'), async (req, res) => {
     res.status(201).json(transformIssue(issue));
   } catch (err) {
     console.error('❌ Error creating issue:', err.message, err.stack);
-    res.status(500).json({ error: 'Failed to create issue', details: err.message });
+    res.status(500).json({ error: 'Failed to create issue' });
   }
 });
 
-app.patch('/api/issues/:id/status', authenticate, upload.single('image'), async (req, res) => {
+// Alert #7 & #8 – rate limiting applied
+app.patch('/api/issues/:id/status', writeLimiter, authenticate, upload.single('image'), async (req, res) => {
   try {
     const { status } = req.body;
     const issue = await Issue.findById(req.params.id);
@@ -228,8 +302,8 @@ app.patch('/api/issues/:id/status', authenticate, upload.single('image'), async 
 });
 
 
-// assignment endpoint (admin only)
-app.patch('/api/issues/:id/assign', authenticate, authorize('ADMIN'), async (req, res) => {
+// Alert #9 & #10 – rate limiting applied; assignment endpoint (admin only)
+app.patch('/api/issues/:id/assign', writeLimiter, authenticate, authorize('ADMIN'), async (req, res) => {
   try {
     const { role } = req.body;
     const issue = await Issue.findById(req.params.id);
@@ -264,7 +338,7 @@ mongoose
   });
 
 // Test text classification endpoint
-app.post('/api/classify-text', async (req, res) => {
+app.post('/api/classify-text', writeLimiter, async (req, res) => {
   try {
     const { description } = req.body;
     
@@ -278,12 +352,12 @@ app.post('/api/classify-text', async (req, res) => {
     res.json(classification);
   } catch (err) {
     console.error('Text classification error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Classification failed' });
   }
 });
 
 // Test YOLO classification endpoint (deprecated - use /api/classify-text instead)
-app.post('/api/test-classify', upload.single('image'), async (req, res) => {
+app.post('/api/test-classify', writeLimiter, upload.single('image'), async (req, res) => {
   try {
     if (!req.body.description) {
       return res.status(400).json({ error: 'No description provided' });
@@ -297,6 +371,6 @@ app.post('/api/test-classify', upload.single('image'), async (req, res) => {
     });
   } catch (err) {
     console.error('Test classification error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Classification failed' });
   }
 });
