@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "home": "Home",
+    "report": "Report Issue",
+    "track": "Track Complaint",
+    "map": "Issues Map",
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "home": {
+    "title": "CivicTrack AI",
+    "subtitle": "Smart Civic Issue Reporting & Tracking",
+    "description": "Report civic issues like potholes, garbage, water leaks and streetlight damage. Our AI automatically categorizes your reports.",
+    "get_started": "Get Started",
+    "report_issue": "Report Issue",
+    "track_status": "Track Status",
+    "view_map": "View Map"
+  },
+  "report_issue": {
+    "title": "Report a Civic Issue",
+    "subtitle": "Fill in the details below to submit your complaint.",
+    "upload_photo": "Upload Photo",
+    "click_to_upload": "Click to upload image",
+    "issue_type": "Issue Type",
+    "select_issue_type": "Select issue type",
+    "description": "Description",
+    "description_placeholder": "Describe the issue in detail...",
+    "ai_hint": "Type at least 10 characters. AI will automatically detect the issue type!",
+    "ai_suggestion": "AI Suggestion: {{type}}",
+    "location": "Location",
+    "use_my_location": "Use My Location",
+    "detecting": "Detecting...",
+    "confirm_location": "Confirm Your Location on Map",
+    "submit": "Submit Issue",
+    "success_title": "Issue Reported Successfully!",
+    "success_message": "Your complaint has been registered with ID",
+    "report_another": "Report Another Issue"
+  },
+  "track": {
+    "title": "Track Your Complaint",
+    "subtitle": "Enter your complaint ID to check status",
+    "complaint_id": "Complaint ID",
+    "search": "Search",
+    "status": "Status",
+    "registered": "Registered",
+    "assigned": "Assigned",
+    "in_progress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "role": "Role",
+    "submit": "Submit",
+    "forgot_password": "Forgot Password?",
+    "create_account": "Create Account",
+    "already_have_account": "Already have an account?"
+  }
+}
