@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { mockIssues } from "@/data/mockData";
+import { motion } from "framer-motion";
 
 const stats = [
   {
@@ -50,69 +51,126 @@ const steps = [
   { icon: CheckCircle2, title: "Authorities Resolve It", desc: "The issue is assigned and tracked until resolved." },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+};
+
 export default function Index() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="civic-gradient py-20 md:py-28">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground mb-6 animate-fade-in">
-            Report Civic Issues Easily
-          </h1>
-          <p className="text-primary-foreground/80 text-lg md:text-xl max-w-2xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            Empowering citizens to report potholes, garbage, water leaks, and more — tracked transparently until resolved.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <Link to="/report">
-              <Button size="lg" variant="hero" className="text-base px-8">
-                Report an Issue <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/track">
-              <Button size="lg" variant="outline" className="text-base px-8 bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-                Track Complaint
-              </Button>
-            </Link>
-          </div>
+      <section className="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-40">
+        <div className="absolute inset-0 bg-slate-900/5 -z-20"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 blur-[120px] rounded-full -z-10 opacity-70"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/20 blur-[100px] rounded-full -z-10 opacity-50"></div>
+        
+        <div className="container mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="max-w-4xl mx-auto"
+          >
+            <h1 className="text-5xl md:text-7xl font-heading font-extrabold text-foreground mb-8 tracking-tight">
+              Report Civic Issues <br />
+              <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">With Intelligence.</span>
+            </h1>
+            <p className="text-muted-foreground text-xl md:text-2xl max-w-2xl mx-auto mb-10">
+              Empowering citizens to report potholes, garbage, water leaks, and more — tracked transparently until resolved.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link to="/report">
+                <Button size="lg" className="h-14 px-8 text-lg rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.6)] hover:scale-105 transition-transform duration-300">
+                  Report an Issue <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/track">
+                <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-border hover:bg-muted hover:scale-105 transition-transform duration-300">
+                  Track Complaint
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* How it works */}
-      <section className="py-16 md:py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-heading font-bold text-center mb-12">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {steps.map((s, i) => (
-              <Card key={i} className="civic-card text-center p-8 group">
-                <CardContent className="p-0 flex flex-col items-center gap-4">
-                  <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <s.icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Step {i + 1}</span>
-                  <h3 className="text-lg font-heading font-semibold">{s.title}</h3>
-                  <p className="text-sm text-muted-foreground">{s.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+      <section className="py-24 relative">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">Process</h2>
+            <h3 className="text-4xl font-heading font-bold text-foreground">How It Works</h3>
           </div>
+          
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+          >
+            {steps.map((s, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <Card className="glass-panel text-center p-10 h-full group hover:-translate-y-2 transition-transform duration-300 rounded-3xl">
+                  <CardContent className="p-0 flex flex-col items-center gap-6">
+                    <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                      <s.icon className="h-10 w-10 text-primary" />
+                    </div>
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-muted px-3 py-1 rounded-full">Step {i + 1}</span>
+                    <h3 className="text-xl font-heading font-semibold text-foreground">{s.title}</h3>
+                    <p className="text-base text-muted-foreground">{s.desc}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-heading font-bold text-center mb-12">Platform Statistics</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {stats.map((s) => (
-              <div key={s.label} className="stat-card items-center text-center">
-                <div className={`h-12 w-12 rounded-xl ${s.bg} flex items-center justify-center`}>
-                  <s.icon className={`h-6 w-6 ${s.color}`} />
-                </div>
-                <span className="text-3xl font-heading font-bold animate-count-up">{s.value}</span>
-                <span className="text-sm text-muted-foreground">{s.label}</span>
-              </div>
-            ))}
+      <section className="py-24 bg-slate-50 dark:bg-slate-900/50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">Impact</h2>
+            <h3 className="text-4xl font-heading font-bold text-foreground">Platform Statistics</h3>
           </div>
+          
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto"
+          >
+            {stats.map((s) => (
+              <motion.div key={s.label} variants={itemVariants} className="glass-panel p-8 rounded-3xl flex flex-col items-center text-center group hover:scale-105 transition-transform duration-300">
+                <div className={`h-16 w-16 rounded-2xl ${s.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <s.icon className={`h-8 w-8 ${s.color}`} />
+                </div>
+                <motion.span 
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                  className="text-4xl font-heading font-bold text-foreground mb-2"
+                >
+                  {s.value}
+                </motion.span>
+                <span className="text-sm font-medium text-muted-foreground">{s.label}</span>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
     </Layout>

@@ -2,125 +2,174 @@ import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockIssues, type CivicIssue } from "@/data/mockData";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { divIcon } from "leaflet";
+import { motion, AnimatePresence } from "framer-motion";
 
-function StatusDot({ status }: { status: string }) {
-  const color =
-    status === "Resolved"
-      ? "bg-accent"
-      : status === "In Progress" || status === "Assigned"
-      ? "bg-civic-amber"
-      : "bg-destructive";
-  return <span className={`inline-block h-3 w-3 rounded-full ${color}`} />;
+function getStatusConfig(status: string) {
+  if (status === "Resolved") return { bg: "bg-accent", icon: CheckCircle2, text: "text-accent", border: "border-accent/30", bgLight: "bg-accent/10" };
+  if (status === "In Progress" || status === "Assigned") return { bg: "bg-civic-amber", icon: Clock, text: "text-civic-amber", border: "border-civic-amber/30", bgLight: "bg-civic-amber/10" };
+  return { bg: "bg-destructive", icon: AlertTriangle, text: "text-destructive", border: "border-destructive/30", bgLight: "bg-destructive/10" };
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const cls =
-    status === "Resolved"
-      ? "civic-badge-resolved"
-      : status === "In Progress" || status === "Assigned"
-      ? "civic-badge-progress"
-      : "civic-badge-pending";
-  return <span className={cls}>{status}</span>;
+  const config = getStatusConfig(status);
+  return <span className={`font-semibold text-xs px-3 py-1.5 rounded-full ${config.bgLight} ${config.text}`}>{status}</span>;
 }
 
 export default function IssuesMap() {
   const [selected, setSelected] = useState<CivicIssue | null>(null);
+  const center: [number, number] = [28.4595, 77.0266];
+
+  const createCustomIcon = (status: string) => {
+    const config = getStatusConfig(status);
+    const htmlString = `
+      <div class="relative group cursor-pointer hover:scale-110 transition-transform">
+        <div class="h-6 w-6 rounded-full ${config.bg} shadow-[0_0_15px_rgba(0,0,0,0.3)] border-2 border-white flex items-center justify-center relative z-10"></div>
+        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-2 bg-black/40 blur-[2px] rounded-full"></div>
+      </div>
+    `;
+    return divIcon({
+      className: "custom-leaflet-icon bg-transparent border-0",
+      html: htmlString,
+      iconSize: [24, 24],
+      iconAnchor: [12, 24],
+      popupAnchor: [0, -24],
+    });
+  };
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-heading font-bold mb-2">Public Issues Map</h1>
-        <p className="text-muted-foreground mb-6">
-          View all reported civic issues. Click a marker for details.
-        </p>
+      <div className="container mx-auto px-6 py-12 relative min-h-[85vh]">
+        <div className="absolute top-20 right-20 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -z-10"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-accent/10 blur-[100px] rounded-full -z-10"></div>
 
-        {/* Legend */}
-        <div className="flex gap-6 mb-6 text-sm">
-          <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-destructive" /> Pending</div>
-          <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-civic-amber" /> In Progress</div>
-          <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-accent" /> Resolved</div>
+        <div className="mb-10 text-center lg:text-left">
+          <h1 className="text-4xl font-heading font-bold mb-3 text-foreground">Public Issues Map</h1>
+          <p className="text-lg text-muted-foreground">
+            Explore reported civic issues in real-time. Click a marker to view detailed information.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map placeholder */}
-          <div className="lg:col-span-2">
-            <div className="relative bg-muted rounded-xl h-[500px] overflow-hidden border">
-              {/* Simulated map with positioned markers */}
-              <div className="absolute inset-0 bg-gradient-to-br from-civic-light to-muted">
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h40v40H0z\' fill=\'none\'/%3E%3Cpath d=\'M0 20h40M20 0v40\' stroke=\'%23000\' stroke-width=\'0.5\'/%3E%3C/svg%3E")' }} />
-              </div>
-              {mockIssues.map((issue, i) => {
-                const top = 15 + (i % 3) * 25 + i * 5;
-                const left = 10 + (i % 4) * 20 + i * 3;
-                return (
-                  <button
+        <div className="flex flex-wrap gap-6 mb-8 justify-center lg:justify-start">
+          <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-full border border-border/50 backdrop-blur-sm shadow-sm"><span className="h-3 w-3 rounded-full bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.6)]" /> <span className="text-sm font-medium">Pending</span></div>
+          <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-full border border-border/50 backdrop-blur-sm shadow-sm"><span className="h-3 w-3 rounded-full bg-civic-amber shadow-[0_0_10px_rgba(245,158,11,0.6)]" /> <span className="text-sm font-medium">In Progress</span></div>
+          <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-full border border-border/50 backdrop-blur-sm shadow-sm"><span className="h-3 w-3 rounded-full bg-accent shadow-[0_0_10px_rgba(34,197,94,0.6)]" /> <span className="text-sm font-medium">Resolved</span></div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 relative z-0">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-3xl h-[600px] overflow-hidden shadow-2xl border border-border/50 relative">
+              <MapContainer center={center} zoom={13} style={{ height: "100%", width: "100%" }} zoomControl={false}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                />
+                {mockIssues.map((issue) => (
+                  <Marker
                     key={issue.id}
-                    onClick={() => setSelected(issue)}
-                    className="absolute z-10 group"
-                    style={{ top: `${Math.min(top, 85)}%`, left: `${Math.min(left, 85)}%` }}
+                    position={[issue.lat, issue.lng]}
+                    icon={createCustomIcon(issue.status)}
+                    eventHandlers={{
+                      click: () => setSelected(issue),
+                    }}
                   >
-                    <div className="relative">
-                      <StatusDot status={issue.status} />
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border">
-                        {issue.type}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+                    <Popup className="rounded-xl overflow-hidden shadow-xl border-0">
+                      <div className="font-heading font-bold text-base mb-1">{issue.type}</div>
+                      <div className="text-xs text-muted-foreground mb-2">{issue.id}</div>
+                      <StatusBadge status={issue.status} />
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
             </div>
           </div>
 
-          {/* Details panel */}
-          <div>
-            {selected ? (
-              <Card className="civic-card animate-fade-in">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-base">{selected.id}</CardTitle>
-                  <button onClick={() => setSelected(null)}>
-                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                  </button>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <img src={selected.image} alt={selected.type} className="w-full h-36 object-cover rounded-lg" />
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{selected.type}</span>
-                    <StatusBadge status={selected.status} />
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" /> {selected.location}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{selected.description}</p>
-                  <p className="text-xs text-muted-foreground">Reported: {selected.date}</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="civic-card">
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <MapPin className="h-8 w-8 mx-auto mb-3 text-primary/50" />
-                  <p className="text-sm">Click a marker on the map to view issue details.</p>
-                </CardContent>
-              </Card>
-            )}
+          <div className="space-y-6">
+            <AnimatePresence mode="wait">
+              {selected ? (
+                <motion.div
+                  key="selected-card"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                >
+                  <Card className="glass-panel border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="flex flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 border-b border-border/50 p-6">
+                      <CardTitle className="text-lg font-heading tracking-wider bg-primary/10 text-primary px-3 py-1 rounded-md">{selected.id}</CardTitle>
+                      <button onClick={() => setSelected(null)} className="p-2 rounded-full hover:bg-muted transition-colors">
+                        <X className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-5">
+                      <div className="relative rounded-2xl overflow-hidden group">
+                        <img src={selected.image} alt={selected.type} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                          <span className="font-heading font-bold text-white text-xl">{selected.type}</span>
+                          <StatusBadge status={selected.status} />
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 bg-muted/30 p-4 rounded-xl border border-border/50">
+                        <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 
+                        <span className="text-sm font-medium leading-relaxed">{selected.location}</span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm text-foreground uppercase tracking-wider">Description</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{selected.description}</p>
+                      </div>
+                      
+                      <p className="text-xs font-semibold text-muted-foreground pt-4 border-t border-border/50">
+                        Reported on {selected.date}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty-card"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                >
+                  <Card className="glass-panel border-0 shadow-xl rounded-3xl h-full flex flex-col justify-center min-h-[300px]">
+                    <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center gap-4">
+                      <div className="p-4 bg-primary/5 rounded-full">
+                        <MapPin className="h-10 w-10 text-primary/50" />
+                      </div>
+                      <p className="text-base font-medium">Click a marker on the map to view detailed issue information.</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {/* Issue list */}
-            <div className="mt-4 space-y-2">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <h4 className="font-heading font-bold text-lg mb-4 sticky top-0 bg-background/80 backdrop-blur-md py-2 z-10 border-b border-border/50">Recent Issues</h4>
               {mockIssues.map((issue) => (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   key={issue.id}
                   onClick={() => setSelected(issue)}
-                  className={`w-full text-left p-3 rounded-lg border text-sm flex items-center gap-3 transition-colors ${
-                    selected?.id === issue.id ? "bg-primary/5 border-primary/30" : "hover:bg-muted"
+                  className={`w-full text-left p-4 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
+                    selected?.id === issue.id 
+                      ? "bg-primary/5 border-primary shadow-md" 
+                      : "bg-background/50 hover:bg-muted border-border/50 shadow-sm"
                   }`}
                 >
-                  <StatusDot status={issue.status} />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{issue.type}</div>
-                    <div className="text-xs text-muted-foreground truncate">{issue.location}</div>
+                  <div className={`h-12 w-12 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 ${getStatusConfig(issue.status).bgLight}`}>
+                    <span className={`h-4 w-4 rounded-full ${getStatusConfig(issue.status).bg}`} />
                   </div>
-                  <span className="text-xs text-muted-foreground">{issue.id}</span>
-                </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-heading font-semibold truncate text-foreground">{issue.type}</div>
+                    <div className="text-xs text-muted-foreground truncate mt-1">{issue.location}</div>
+                  </div>
+                  <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-md">{issue.id}</span>
+                </motion.button>
               ))}
             </div>
           </div>
