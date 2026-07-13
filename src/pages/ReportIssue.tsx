@@ -16,7 +16,13 @@ export default function ReportIssue() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setPreview(URL.createObjectURL(file));
+    if (file) {
+      // Alert #2: Only assign blob: URLs to prevent DOM XSS via crafted object URLs
+      const url = URL.createObjectURL(file);
+      if (url.startsWith('blob:')) {
+        setPreview(url);
+      }
+    }
   };
 
   return (
@@ -82,8 +88,10 @@ export default function ReportIssue() {
                         <motion.img 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          src={preview} 
-                          alt="Preview" 
+                          src={preview ?? undefined}
+                          alt="Preview"
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
                           className="h-full w-full object-cover" 
                         />
                       ) : (

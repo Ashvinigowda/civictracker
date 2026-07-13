@@ -90,8 +90,9 @@ def classify_description():
         return jsonify(result)
 
     except Exception as e:
+        # Alert #1: log full exception server-side; return generic message to caller
         print(f"[ERROR] Classify error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     print("=" * 60)
