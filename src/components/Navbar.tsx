@@ -16,22 +16,22 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-4 z-50 mx-4 lg:mx-auto w-[96%] max-w-[90rem] glass-panel rounded-3xl mb-6">
-      <div className="flex items-center justify-between h-[5rem] px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2 font-heading font-bold text-xl text-primary hover:scale-105 transition-transform duration-300 md:-ml-2">
-          <Shield className="h-6 w-6" />
+    <nav className="sticky top-6 z-50 mx-4 lg:mx-auto w-[96%] max-w-[70rem] true-glass rounded-full mb-6">
+      <div className="flex items-center justify-between h-14 px-6">
+        <Link to="/" className="flex items-center gap-2 font-heading font-semibold text-lg text-primary hover:opacity-80 transition-opacity duration-300">
+          <Shield className="h-5 w-5" />
           <span>CivicTrack AI</span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1">
           {navLinks.map((l) => {
             const isActive = location.pathname === l.to;
             return (
               <Link
                 key={l.to}
                 to={l.to}
-                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`relative px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
