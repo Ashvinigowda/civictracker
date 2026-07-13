@@ -17,12 +17,21 @@ export default function ReportIssue() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Alert #2: Only assign blob: URLs to prevent DOM XSS via crafted object URLs
-      const url = URL.createObjectURL(file);
-      if (url.startsWith('blob:')) {
-        setPreview(url);
-      }
+      setPreview(URL.createObjectURL(file));
     }
+  };
+
+  const getSafeUrl = (url: string | null) => {
+    if (!url) return undefined;
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.protocol === 'blob:' || parsed.protocol === 'data:') {
+        return parsed.href;
+      }
+    } catch (e) {
+      return undefined;
+    }
+    return undefined;
   };
 
   return (
@@ -88,7 +97,7 @@ export default function ReportIssue() {
                         <motion.img 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          src={preview && preview.startsWith('blob:') ? preview : undefined}
+                          src={getSafeUrl(preview)}
                           alt="Preview"
                           referrerPolicy="no-referrer"
                           crossOrigin="anonymous"
