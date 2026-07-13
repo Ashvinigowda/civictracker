@@ -15,6 +15,18 @@ CivicTrack AI is a modern civic engagement platform that bridges the gap between
 
 ---
 
+## System Preview
+
+| Admin Dashboard | Public Issues Map |
+| :---: | :---: |
+| ![Admin Dashboard](public/dashboard.png) | ![Public Issues Map](public/public-issue-map.png) |
+
+| Report an Issue | Track Complaint |
+| :---: | :---: |
+| ![Report Issue](public/report-issue.png) | ![Track Complaint](public/track-complaint.png) |
+
+---
+
 ## Features
 
 | Feature | Description |
