@@ -152,7 +152,7 @@ civictrack-ai/
 
 ## System Architecture
 
-![System Architecture](public/CivicTracker%20—%20System%20Architecture.png)
+![System Architecture](public/CivicTracker-System-Architecture.png)
 
 > **Note**: An editable version of this architecture diagram is available at [`public/raw-editiable-system-architecture.excalidraw`](public/raw-editiable-system-architecture.excalidraw). You can open it in [Excalidraw](https://excalidraw.com/) to edit.
 
@@ -160,22 +160,7 @@ civictrack-ai/
 
 ## How It Works
 
-```
-Citizen                  CivicTrack AI               Authority
-   │                           │                          │
-   │  Upload photo + details   │                          │
-   │──────────────────────────>│                          │
-   │                           │  AI categorizes issue    │
-   │                           │─────────────────────>    │
-   │  Complaint ID returned    │                          │
-   │<──────────────────────────│  Assigns to department   │
-   │                           │─────────────────────────>│
-   │  Track status via ID      │                          │
-   │──────────────────────────>│  Updates status          │
-   │                           │<─────────────────────────│
-   │  View resolved status     │                          │
-   │<──────────────────────────│                          │
-```
+
 
 1. **Report** — A citizen spots an issue and submits it with a photo, type, and location.
 2. **Detect** — The AI pipeline analyzes the image and auto-categorizes the problem.
