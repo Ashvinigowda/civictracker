@@ -15,7 +15,7 @@ function getStatusConfig(status: string) {
 
 function StatusBadge({ status }: { status: string }) {
   const config = getStatusConfig(status);
-  return <span className={`font-semibold text-xs px-3 py-1.5 rounded-full ${config.bgLight} ${config.text}`}>{status}</span>;
+  return <span className={`font-semibold text-xs px-3 py-1.5 rounded-full uppercase tracking-wider ${config.bgLight} ${config.text}`}>{status}</span>;
 }
 
 export default function IssuesMap() {
@@ -41,26 +41,23 @@ export default function IssuesMap() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-6 py-12 relative min-h-[85vh]">
-        <div className="absolute top-20 right-20 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -z-10"></div>
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-accent/10 blur-[100px] rounded-full -z-10"></div>
-
-        <div className="mb-10 text-center lg:text-left">
-          <h1 className="text-4xl font-heading font-bold mb-3 text-foreground">Public Issues Map</h1>
-          <p className="text-lg text-muted-foreground">
+      <div className="container mx-auto px-6 py-24 min-h-[90vh]">
+        <div className="mb-12 text-center lg:text-left">
+          <h1 className="text-6xl font-heading font-normal mb-4 text-foreground tracking-tight">Public Issues <span className="italic text-primary">Map.</span></h1>
+          <p className="text-xl text-muted-foreground">
             Explore reported civic issues in real-time. Click a marker to view detailed information.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-6 mb-8 justify-center lg:justify-start">
-          <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-full border border-border/50 backdrop-blur-sm shadow-sm"><span className="h-3 w-3 rounded-full bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.6)]" /> <span className="text-sm font-medium">Pending</span></div>
-          <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-full border border-border/50 backdrop-blur-sm shadow-sm"><span className="h-3 w-3 rounded-full bg-civic-amber shadow-[0_0_10px_rgba(245,158,11,0.6)]" /> <span className="text-sm font-medium">In Progress</span></div>
-          <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-full border border-border/50 backdrop-blur-sm shadow-sm"><span className="h-3 w-3 rounded-full bg-accent shadow-[0_0_10px_rgba(34,197,94,0.6)]" /> <span className="text-sm font-medium">Resolved</span></div>
+        <div className="flex flex-wrap gap-4 mb-10 justify-center lg:justify-start">
+          <div className="flex items-center gap-3 bg-background/50 px-5 py-3 rounded-full border border-border/50 shadow-sm"><span className="h-3 w-3 rounded-full bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.6)]" /> <span className="text-sm font-medium uppercase tracking-wider">Pending</span></div>
+          <div className="flex items-center gap-3 bg-background/50 px-5 py-3 rounded-full border border-border/50 shadow-sm"><span className="h-3 w-3 rounded-full bg-civic-amber shadow-[0_0_10px_rgba(245,158,11,0.6)]" /> <span className="text-sm font-medium uppercase tracking-wider">In Progress</span></div>
+          <div className="flex items-center gap-3 bg-background/50 px-5 py-3 rounded-full border border-border/50 shadow-sm"><span className="h-3 w-3 rounded-full bg-accent shadow-[0_0_10px_rgba(34,197,94,0.6)]" /> <span className="text-sm font-medium uppercase tracking-wider">Resolved</span></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2 relative z-0">
-            <div className="bg-slate-100 dark:bg-slate-800 rounded-3xl h-[600px] overflow-hidden shadow-2xl border border-border/50 relative">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-[2rem] h-[600px] overflow-hidden shadow-2xl border border-border/50 relative">
               <MapContainer center={center} zoom={13} style={{ height: "100%", width: "100%" }} zoomControl={false}>
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -76,8 +73,8 @@ export default function IssuesMap() {
                     }}
                   >
                     <Popup className="rounded-xl overflow-hidden shadow-xl border-0">
-                      <div className="font-heading font-bold text-base mb-1">{issue.type}</div>
-                      <div className="text-xs text-muted-foreground mb-2">{issue.id}</div>
+                      <div className="font-heading font-medium text-base mb-1">{issue.type}</div>
+                      <div className="text-xs text-muted-foreground mb-2 tracking-wider uppercase">{issue.id}</div>
                       <StatusBadge status={issue.status} />
                     </Popup>
                   </Marker>
@@ -91,38 +88,39 @@ export default function IssuesMap() {
               {selected ? (
                 <motion.div
                   key="selected-card"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", bounce: 0.4 }}
                 >
-                  <Card className="glass-panel border-0 shadow-2xl rounded-3xl overflow-hidden">
-                    <CardHeader className="flex flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 border-b border-border/50 p-6">
-                      <CardTitle className="text-lg font-heading tracking-wider bg-primary/10 text-primary px-3 py-1 rounded-md">{selected.id}</CardTitle>
-                      <button onClick={() => setSelected(null)} className="p-2 rounded-full hover:bg-muted transition-colors">
+                  <Card className="true-glass border-0 shadow-2xl rounded-[2rem] overflow-hidden">
+                    <CardHeader className="flex flex-row items-center justify-between border-b border-border/20 p-6">
+                      <CardTitle className="text-sm font-heading font-bold tracking-widest uppercase bg-primary/10 text-primary px-3 py-1 rounded-md">{selected.id}</CardTitle>
+                      <button onClick={() => setSelected(null)} className="p-2 rounded-full hover:bg-black/5 transition-colors">
                         <X className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                       </button>
                     </CardHeader>
-                    <CardContent className="p-6 space-y-5">
+                    <CardContent className="p-6 space-y-6">
                       <div className="relative rounded-2xl overflow-hidden group">
-                        <img src={selected.image} alt={selected.type} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <img src={selected.image} alt={selected.type} className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                          <span className="font-heading font-bold text-white text-xl">{selected.type}</span>
+                          <span className="font-heading font-medium text-white text-2xl tracking-tight">{selected.type}</span>
                           <StatusBadge status={selected.status} />
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3 bg-muted/30 p-4 rounded-xl border border-border/50">
+                      <div className="flex items-start gap-4 p-4 rounded-xl">
                         <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 
-                        <span className="text-sm font-medium leading-relaxed">{selected.location}</span>
+                        <span className="text-base font-medium leading-relaxed">{selected.location}</span>
                       </div>
                       
-                      <div className="space-y-2">
-                        <h4 className="font-semibold text-sm text-foreground uppercase tracking-wider">Description</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{selected.description}</p>
+                      <div className="space-y-2 px-2">
+                        <h4 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">Description</h4>
+                        <p className="text-base text-foreground/80 leading-relaxed font-light">{selected.description}</p>
                       </div>
                       
-                      <p className="text-xs font-semibold text-muted-foreground pt-4 border-t border-border/50">
+                      <p className="text-xs font-semibold text-muted-foreground pt-6 border-t border-border/20 px-2 uppercase tracking-wider">
                         Reported on {selected.date}
                       </p>
                     </CardContent>
@@ -131,44 +129,45 @@ export default function IssuesMap() {
               ) : (
                 <motion.div
                   key="empty-card"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                 >
-                  <Card className="glass-panel border-0 shadow-xl rounded-3xl h-full flex flex-col justify-center min-h-[300px]">
-                    <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center gap-4">
-                      <div className="p-4 bg-primary/5 rounded-full">
+                  <Card className="true-glass border border-dashed border-border/50 shadow-none rounded-[2rem] h-full flex flex-col justify-center min-h-[350px]">
+                    <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center gap-6">
+                      <div className="p-5 bg-primary/5 rounded-full">
                         <MapPin className="h-10 w-10 text-primary/50" />
                       </div>
-                      <p className="text-base font-medium">Click a marker on the map to view detailed issue information.</p>
+                      <p className="text-lg font-medium max-w-[200px] leading-relaxed">Click a marker on the map to view detailed issue information.</p>
                     </CardContent>
                   </Card>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              <h4 className="font-heading font-bold text-lg mb-4 sticky top-0 bg-background/80 backdrop-blur-md py-2 z-10 border-b border-border/50">Recent Issues</h4>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <h4 className="font-heading font-medium text-xl mb-4 sticky top-0 bg-background/80 backdrop-blur-md py-3 z-10 border-b border-border/20">Recent Issues</h4>
               {mockIssues.map((issue) => (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", bounce: 0.5 }}
                   key={issue.id}
                   onClick={() => setSelected(issue)}
-                  className={`w-full text-left p-4 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
+                  className={`w-full text-left p-5 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
                     selected?.id === issue.id 
                       ? "bg-primary/5 border-primary shadow-md" 
-                      : "bg-background/50 hover:bg-muted border-border/50 shadow-sm"
+                      : "bg-background/50 hover:bg-black/5 border-border/50 shadow-sm"
                   }`}
                 >
                   <div className={`h-12 w-12 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 ${getStatusConfig(issue.status).bgLight}`}>
                     <span className={`h-4 w-4 rounded-full ${getStatusConfig(issue.status).bg}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-heading font-semibold truncate text-foreground">{issue.type}</div>
-                    <div className="text-xs text-muted-foreground truncate mt-1">{issue.location}</div>
+                    <div className="font-heading font-medium truncate text-foreground text-lg">{issue.type}</div>
+                    <div className="text-sm text-muted-foreground truncate mt-1">{issue.location}</div>
                   </div>
-                  <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-md">{issue.id}</span>
+                  <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-md uppercase tracking-wider">{issue.id}</span>
                 </motion.button>
               ))}
             </div>

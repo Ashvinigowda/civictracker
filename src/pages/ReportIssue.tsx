@@ -21,63 +21,63 @@ export default function ReportIssue() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-6 py-16 relative">
-        <div className="absolute top-0 right-10 w-72 h-72 bg-primary/10 blur-[100px] rounded-full -z-10"></div>
-        <div className="absolute bottom-0 left-10 w-96 h-96 bg-accent/10 blur-[120px] rounded-full -z-10"></div>
-        
+      <div className="container mx-auto px-6 py-24 relative">
         <AnimatePresence mode="wait">
           {submitted ? (
             <motion.div 
               key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6 py-20"
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", bounce: 0.4 }}
+              className="max-w-2xl mx-auto flex flex-col items-center text-center gap-8 py-20 true-glass rounded-[2rem] p-12"
             >
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
-                className="h-28 w-28 rounded-full bg-accent/10 flex items-center justify-center shadow-[0_0_40px_rgba(34,197,94,0.3)]"
+                transition={{ type: "spring", bounce: 0.6, delay: 0.2 }}
+                className="h-32 w-32 rounded-full bg-accent/10 flex items-center justify-center shadow-[0_0_60px_rgba(34,197,94,0.2)]"
               >
-                <CheckCircle2 className="h-14 w-14 text-accent" />
+                <CheckCircle2 className="h-16 w-16 text-accent" />
               </motion.div>
-              <h1 className="text-4xl font-heading font-bold text-foreground">Issue Reported Successfully!</h1>
-              <p className="text-lg text-muted-foreground max-w-md">
-                Your complaint has been registered with ID <strong className="text-primary bg-primary/10 px-2 py-1 rounded-md">CIV-1007</strong>. You can track its status on the tracking page.
+              <h1 className="text-5xl font-heading font-medium text-foreground tracking-tight">Issue Reported</h1>
+              <p className="text-xl text-muted-foreground max-w-md leading-relaxed">
+                Your complaint is registered under ID <strong className="text-foreground border-b border-foreground/30 font-medium">CIV-1007</strong>.
               </p>
-              <Button size="lg" className="mt-4 rounded-full shadow-lg hover:scale-105 transition-transform duration-300" onClick={() => {
+              <Button size="lg" className="mt-8 rounded-full hover:scale-105 transition-transform duration-300" onClick={() => {
                 setSubmitted(false);
                 setPreview(null);
               }}>
-                Report Another Issue
+                Report Another
               </Button>
             </motion.div>
           ) : (
             <motion.div 
               key="form"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="max-w-2xl mx-auto"
+              transition={{ type: "spring", bounce: 0, duration: 0.7 }}
+              className="max-w-3xl mx-auto"
             >
-              <div className="mb-10 text-center">
-                <h1 className="text-4xl font-heading font-bold mb-3 text-foreground">Report a Civic Issue</h1>
-                <p className="text-lg text-muted-foreground">Fill in the details below to submit your complaint.</p>
+              <div className="mb-12 text-center md:text-left">
+                <h1 className="text-5xl md:text-6xl font-heading font-normal mb-4 text-foreground tracking-tight">Report a Civic Issue</h1>
+                <p className="text-xl text-muted-foreground">Fill in the details below to submit your complaint.</p>
               </div>
 
-              <Card className="glass-panel border-0 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-border/50 py-6">
-                  <CardTitle className="text-xl font-heading flex items-center gap-2">
-                    <Upload className="h-5 w-5 text-primary" />
+              <Card className="true-glass border-0 shadow-2xl rounded-[2rem] overflow-hidden relative">
+                <div className="absolute inset-0 bg-background/40 mix-blend-overlay -z-10"></div>
+                <CardHeader className="border-b border-border/20 py-8 px-10">
+                  <CardTitle className="text-2xl font-heading flex items-center gap-3 font-normal">
+                    <Upload className="h-6 w-6 text-primary" />
                     Issue Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-8 p-8">
+                <CardContent className="space-y-10 p-10">
                   {/* Image upload */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-foreground">Upload Photo</Label>
-                    <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 group overflow-hidden">
+                  <div className="space-y-4">
+                    <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Photo Evidence</Label>
+                    <label className="flex flex-col items-center justify-center h-56 border border-border/50 bg-background/30 rounded-2xl cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 group overflow-hidden relative">
                       {preview ? (
                         <motion.img 
                           initial={{ opacity: 0 }}
@@ -87,8 +87,8 @@ export default function ReportIssue() {
                           className="h-full w-full object-cover" 
                         />
                       ) : (
-                        <div className="flex flex-col items-center gap-3 text-muted-foreground group-hover:text-primary transition-colors">
-                          <div className="p-4 bg-muted rounded-full group-hover:bg-primary/10 transition-colors">
+                        <div className="flex flex-col items-center gap-4 text-muted-foreground group-hover:text-primary transition-colors z-10">
+                          <div className="p-5 bg-muted/50 rounded-full group-hover:bg-primary/10 transition-colors">
                             <ImageIcon className="h-8 w-8" />
                           </div>
                           <span className="text-sm font-medium">Click to upload image</span>
@@ -98,54 +98,48 @@ export default function ReportIssue() {
                     </label>
                   </div>
 
-                  {/* Issue type */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-foreground">Issue Type</Label>
-                    <Select>
-                      <SelectTrigger className="h-12 rounded-xl bg-background/50 backdrop-blur-sm border-border focus:ring-primary focus:ring-offset-0">
-                        <SelectValue placeholder="Select issue type" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        {(["Pothole", "Garbage", "Water Leak", "Streetlight Damage", "Other"] as IssueType[]).map((t) => (
-                          <SelectItem key={t} value={t} className="rounded-lg">{t}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {/* Issue type */}
+                    <div className="space-y-4">
+                      <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Category</Label>
+                      <Select>
+                        <SelectTrigger className="h-14 rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 text-base">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {(["Pothole", "Garbage", "Water Leak", "Streetlight Damage", "Other"] as IssueType[]).map((t) => (
+                            <SelectItem key={t} value={t} className="rounded-lg">{t}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Location */}
+                    <div className="space-y-4">
+                      <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Location</Label>
+                      <div className="relative group">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input 
+                          placeholder="Address or landmark" 
+                          className="pl-12 h-14 rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 text-base" 
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-foreground">Description</Label>
+                  <div className="space-y-4">
+                    <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Description</Label>
                     <Textarea 
-                      placeholder="Describe the issue in detail..." 
-                      rows={4} 
-                      className="rounded-xl bg-background/50 backdrop-blur-sm border-border focus:ring-primary focus:ring-offset-0 resize-none"
+                      placeholder="Add specific details..." 
+                      rows={5} 
+                      className="rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 resize-none text-base p-4"
                     />
-                  </div>
-
-                  {/* Location */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-foreground">Location</Label>
-                    <div className="relative group">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      <Input 
-                        placeholder="Enter address or landmark" 
-                        className="pl-12 h-12 rounded-xl bg-background/50 backdrop-blur-sm border-border focus:ring-primary focus:ring-offset-0" 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Map preview placeholder */}
-                  <div className="h-40 rounded-2xl bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center border border-border/50">
-                    <div className="text-center text-muted-foreground">
-                      <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <span className="text-sm font-medium">Map preview will appear here</span>
-                    </div>
                   </div>
 
                   <Button 
                     size="lg" 
-                    className="w-full h-14 text-lg rounded-xl shadow-lg hover:shadow-primary/25 hover:-translate-y-1 transition-all duration-300" 
+                    className="w-full h-16 text-lg rounded-xl shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 font-medium tracking-wide mt-4" 
                     onClick={() => setSubmitted(true)}
                   >
                     Submit Report
