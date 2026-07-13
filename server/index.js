@@ -51,9 +51,9 @@ function isValidString(value) {
 }
 
 // Validate email format
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 function isValidEmail(value) {
-  return isValidString(value) && EMAIL_REGEX.test(value);
+  return isValidString(value) && value.length <= 254 && EMAIL_REGEX.test(value);
 }
 
 // Allowlist of valid department roles for filtering

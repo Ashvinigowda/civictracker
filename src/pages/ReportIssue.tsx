@@ -88,7 +88,7 @@ export default function ReportIssue() {
                         <motion.img 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          src={preview ?? undefined}
+                          src={preview && preview.startsWith('blob:') ? preview : undefined}
                           alt="Preview"
                           referrerPolicy="no-referrer"
                           crossOrigin="anonymous"
