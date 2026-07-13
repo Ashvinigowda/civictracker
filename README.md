@@ -196,13 +196,6 @@ npm run test:watch
 
 Tests are located in `src/test/` and use [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
 
----
-
-## License
-
-This project is licensed under the **[MIT License](./LICENCE)** — see the [`LICENCE`](./LICENCE) file for full details.
-
----
 
 ## Contributing
 
@@ -219,3 +212,11 @@ Contributions, bug reports, and feature requests are welcome!
 <div align="center">
   <sub>Built with ❤️ to make cities better, one report at a time.</sub>
 </div>
+
+---
+
+## License
+
+This project is licensed under the **[MIT License](./LICENCE)** — see the [`LICENCE`](./LICENCE) file for full details.
+
+---
