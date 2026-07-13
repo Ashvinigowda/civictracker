@@ -179,14 +179,13 @@ app.post('/api/issues', upload.single('image'), async (req, res) => {
       const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
       issueData.image = imageUrl;
 
-      // Auto-classify image with YOLO if requested and no type provided
+      // Auto-classify issue description via AI if requested and no type provided
       if (autoClassify === 'true' && (!type || type === 'Other')) {
-        const imagePath = path.join(__dirname, 'uploads', req.file.filename);
-        const classification = await classifyImageWithYOLO(imagePath);
+        const classification = await classifyDescriptionWithAI(description);
 
         if (classification.issue_type && classification.issue_type !== 'Other') {
           issueData.type = classification.issue_type;
-          console.log(`YOLO classified image as: ${classification.issue_type} (confidence: ${classification.confidence})`);
+          console.log(`AI classified description as: ${classification.issue_type} (confidence: ${classification.confidence})`);
         }
       }
     }
