@@ -207,16 +207,13 @@ Contributions, bug reports, and feature requests are welcome!
 4. Push to your branch: `git push origin feature/your-feature-name`
 5. Open a Pull Request
 
----
+## License
+
+This project is licensed under the **[MIT License](./LICENCE)** — see the [`LICENCE`](./LICENCE) file for full details.
+
 
 <div align="center">
   <sub>Built with ❤️ to make cities better, one report at a time.</sub>
 </div>
-
----
-
-## License
-
-This project is licensed under the **[MIT License](./LICENCE)** — see the [`LICENCE`](./LICENCE) file for full details.
 
 ---
