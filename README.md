@@ -150,6 +150,14 @@ civictrack-ai/
 
 ---
 
+## System Architecture
+
+![System Architecture](public/CivicTracker%20—%20System%20Architecture.png)
+
+> **Note**: An editable version of this architecture diagram is available at [`public/raw-editiable-system-architecture.excalidraw`](public/raw-editiable-system-architecture.excalidraw). You can open it in [Excalidraw](https://excalidraw.com/) to edit.
+
+---
+
 ## How It Works
 
 ```
