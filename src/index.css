@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode (default) */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+
+    --card: 129 16% 88%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 163 66% 14%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 129 16% 51%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 50 44% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 95%;
+    --ring: 163 66% 14%;
+
+    --radius: 0.75rem;
+
+    /* Custom civic tokens - light mode */
+    --civic-navy: 163 66% 14%;
+    --civic-blue: 163 66% 20%;
+    --civic-sky: 163 60% 30%;
+    --civic-sage: 129 16% 51%;
+    --civic-olive: 50 44% 53%;
+    --civic-amber: 44 100% 50%;
+    --civic-red: 0 84% 60%;
+    --civic-light: 0 0% 98%;
+
+    --sidebar-background: 163 66% 14%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 50 44% 53%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 44 100% 50%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 163 66% 25%;
+    --sidebar-ring: 50 44% 53%;
+  }
+
+  .dark {
+    /* Light mode stays the same */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 129 16% 88%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 163 66% 14%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 129 16% 51%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 50 44% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 95%;
+    --ring: 163 66% 14%;
+    --sidebar-background: 163 66% 14%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 50 44% 53%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 44 100% 50%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 163 66% 25%;
+    --sidebar-ring: 50 44% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .civic-gradient {
+    background: linear-gradient(135deg, hsl(var(--civic-navy)), hsl(var(--civic-blue)), hsl(var(--civic-sky)));
+  }
+
+  .civic-card {
+    @apply bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+
+  .civic-badge-pending {
+    @apply bg-destructive/10 text-destructive font-medium text-xs px-2.5 py-1 rounded-full;
+  }
+
+  .civic-badge-progress {
+    @apply bg-amber-100 text-amber-700 font-medium text-xs px-2.5 py-1 rounded-full;
+  }
+
+  .civic-badge-resolved {
+    @apply bg-accent/10 text-accent font-medium text-xs px-2.5 py-1 rounded-full;
+  }
+
+  .stat-card {
+    @apply civic-card p-6 flex flex-col items-start gap-2;
+  }
+}
