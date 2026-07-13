@@ -1,9 +1,0 @@
-{
-  "name": "civictrack-ai-i18n",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "react-i18next": "^13.0.0",
-    "i18next": "^23.0.0"
-  }
-}
