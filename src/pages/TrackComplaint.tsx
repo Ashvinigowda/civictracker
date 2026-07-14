@@ -3,8 +3,10 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Calendar, Tag, FileImage, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import { mockIssues, type CivicIssue } from "@/data/mockData";
+import { Search, MapPin, Calendar, Tag, FileImage, CheckCircle2, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { type CivicIssue } from "@/data/mockData";
+import { getIssueById } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 
 function StatusBadge({ status }: { status: string }) {
@@ -61,12 +63,18 @@ function StatusTimeline({ status }: { status: string }) {
 
 export default function TrackComplaint() {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<CivicIssue | null | "not_found">(null);
+  const [searchId, setSearchId] = useState("");
+
+  const { data: result, isLoading, isError, error } = useQuery({
+    queryKey: ['issue', searchId],
+    queryFn: () => getIssueById(searchId),
+    enabled: !!searchId,
+    retry: false
+  });
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    const found = mockIssues.find((i) => i.id.toLowerCase() === query.trim().toLowerCase());
-    setResult(found || "not_found");
+    setSearchId(query.trim());
   };
 
   return (
@@ -108,7 +116,7 @@ export default function TrackComplaint() {
           {/* Results Column */}
           <div className="lg:col-span-7">
             <AnimatePresence mode="wait">
-              {!result && (
+              {!searchId && !isLoading && (
                 <motion.div 
                   key="empty"
                   initial={{ opacity: 0 }}
@@ -125,7 +133,22 @@ export default function TrackComplaint() {
                 </motion.div>
               )}
 
-              {result === "not_found" && (
+              {isLoading && (
+                <motion.div 
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                  className="h-full min-h-[400px] flex items-center justify-center border border-dashed border-border/50 rounded-[2rem] bg-background/30"
+                >
+                  <div className="text-center text-muted-foreground flex flex-col items-center gap-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                    <p className="text-lg">Searching for complaint...</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {(isError || (searchId && !isLoading && !result)) && (
                 <motion.div 
                   key="not_found"
                   initial={{ opacity: 0, y: 20 }}
@@ -147,7 +170,7 @@ export default function TrackComplaint() {
                 </motion.div>
               )}
 
-              {result && result !== "not_found" && (
+              {result && !isLoading && !isError && (
                 <motion.div 
                   key="found"
                   initial={{ opacity: 0, y: 30 }}
@@ -185,7 +208,10 @@ export default function TrackComplaint() {
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Date Reported</p>
-                              <p className="font-medium text-lg flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" /> {result.date}</p>
+                              <p className="font-medium text-lg flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-primary" /> 
+                                {new Date(result.date).toLocaleDateString()}
+                              </p>
                             </div>
                           </div>
                         </div>
