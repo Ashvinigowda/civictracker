@@ -21,6 +21,9 @@ export default function ReportIssue() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [aiConfidence, setAiConfidence] = useState<number | null>(null);
 
   const reportMutation = useMutation({
     mutationFn: (formData: FormData) => reportIssue(formData),
@@ -49,11 +52,37 @@ export default function ReportIssue() {
     reportMutation.mutate(formData);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       setPreview(URL.createObjectURL(file));
+      
+      // Auto-detect with YOLO
+      setIsDetecting(true);
+      setAiConfidence(null);
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      try {
+        const response = await fetch('/api/yolo/classify', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.issue_type && data.issue_type !== 'Other') {
+            setType(data.issue_type as IssueType);
+            setAiConfidence(data.confidence);
+            toast.success(`AI Vision detected: ${data.issue_type}`);
+          }
+        }
+      } catch (err) {
+        console.error("YOLO auto-classify failed:", err);
+      } finally {
+        setIsDetecting(false);
+      }
     }
   };
 
@@ -158,7 +187,15 @@ export default function ReportIssue() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     {/* Issue type */}
                     <div className="space-y-4">
-                      <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Category</Label>
+                      <Label className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                        Category
+                        {isDetecting && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                        {aiConfidence && (
+                          <span className="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            AI Detected ({Math.round(aiConfidence * 100)}%)
+                          </span>
+                        )}
+                      </Label>
                       <Select value={type} onValueChange={(val) => setType(val as IssueType)}>
                         <SelectTrigger className="h-14 rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 text-base">
                           <SelectValue placeholder="Select type" />
