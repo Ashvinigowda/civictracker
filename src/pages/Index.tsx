@@ -11,39 +11,10 @@ import {
   AlertTriangle,
   ArrowRight,
 } from "lucide-react";
-import { mockIssues } from "@/data/mockData";
-import { motion } from "framer-motion";
+import { getIssues } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
-const stats = [
-  {
-    label: "Total Reported",
-    value: mockIssues.length,
-    icon: BarChart3,
-    color: "text-primary",
-    bg: "bg-primary/10",
-  },
-  {
-    label: "Resolved",
-    value: mockIssues.filter((i) => i.status === "Resolved").length,
-    icon: CheckCircle2,
-    color: "text-accent",
-    bg: "bg-accent/10",
-  },
-  {
-    label: "In Progress",
-    value: mockIssues.filter((i) => i.status === "In Progress" || i.status === "Assigned").length,
-    icon: Clock,
-    color: "text-civic-amber",
-    bg: "bg-civic-amber/10",
-  },
-  {
-    label: "Pending",
-    value: mockIssues.filter((i) => i.status === "Reported").length,
-    icon: AlertTriangle,
-    color: "text-destructive",
-    bg: "bg-destructive/10",
-  },
-];
+import { motion } from "framer-motion";
 
 const steps = [
   { icon: Camera, title: "Upload Photo", desc: "Snap a photo of the civic issue you've spotted." },
@@ -67,6 +38,42 @@ const itemVariants = {
 };
 
 export default function Index() {
+  const { data: issues = [] } = useQuery({
+    queryKey: ['public-issues'],
+    queryFn: () => getIssues()
+  });
+
+  const stats = [
+    {
+      label: "Total Reported",
+      value: issues.length,
+      icon: BarChart3,
+      color: "text-primary",
+      bg: "bg-primary/10",
+    },
+    {
+      label: "Resolved",
+      value: issues.filter((i) => i.status === "Resolved").length,
+      icon: CheckCircle2,
+      color: "text-accent",
+      bg: "bg-accent/10",
+    },
+    {
+      label: "In Progress",
+      value: issues.filter((i) => i.status === "In Progress" || i.status === "Assigned").length,
+      icon: Clock,
+      color: "text-civic-amber",
+      bg: "bg-civic-amber/10",
+    },
+    {
+      label: "Pending",
+      value: issues.filter((i) => i.status === "Reported").length,
+      icon: AlertTriangle,
+      color: "text-destructive",
+      bg: "bg-destructive/10",
+    },
+  ];
+
   return (
     <Layout>
       {/* Hero */}

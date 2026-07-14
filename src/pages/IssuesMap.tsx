@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockIssues, type CivicIssue } from "@/data/mockData";
+import { type CivicIssue } from "@/data/mockData";
+import { getIssues } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { MapPin, X, AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -21,6 +23,11 @@ function StatusBadge({ status }: { status: string }) {
 export default function IssuesMap() {
   const [selected, setSelected] = useState<CivicIssue | null>(null);
   const center: [number, number] = [28.4595, 77.0266];
+
+  const { data: issues = [], isLoading } = useQuery({
+    queryKey: ['issues-map'],
+    queryFn: () => getIssues()
+  });
 
   const createCustomIcon = (status: string) => {
     const config = getStatusConfig(status);
@@ -63,10 +70,10 @@ export default function IssuesMap() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                 />
-                {mockIssues.map((issue) => (
+                {issues.map((issue) => (
                   <Marker
                     key={issue.id}
-                    position={[issue.lat, issue.lng]}
+                    position={[issue.lat || 0, issue.lng || 0]}
                     icon={createCustomIcon(issue.status)}
                     eventHandlers={{
                       click: () => setSelected(issue),
@@ -147,7 +154,8 @@ export default function IssuesMap() {
 
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               <h4 className="font-heading font-medium text-xl mb-4 sticky top-0 bg-background/80 backdrop-blur-md py-3 z-10 border-b border-border/20">Recent Issues</h4>
-              {mockIssues.map((issue) => (
+              {isLoading && <p className="text-muted-foreground p-4">Loading issues...</p>}
+              {issues.map((issue) => (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

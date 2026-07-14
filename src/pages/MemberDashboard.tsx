@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type CivicIssue, type IssueStatus } from "@/data/mockData";
-import { getIssues, updateIssueStatus, getNotifications, Notification as ApiNotification } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
+import { type IssueStatus } from "@/data/mockData";
+import { getIssues, updateIssueStatus } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   MapPin,
   BarChart3,
   CheckCircle2,
   Clock,
   AlertTriangle,
+  LogOut,
 } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
@@ -24,36 +26,20 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function MemberDashboard() {
-  const [issues, setIssues] = useState<CivicIssue[]>([]);
-  const [notificationsState, setNotificationsState] = useState<ApiNotification[]>([]);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
   const [fileUploads, setFileUploads] = useState<{ [id: string]: File | null }>({});
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await getIssues(user?.role || undefined);
-        setIssues(data);
-        const notes = await getNotifications();
-        setNotificationsState(notes);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    load();
-  }, [user]);
+  const { data: issues = [], isLoading } = useQuery({
+    queryKey: ['member-issues', user?.role],
+    queryFn: () => getIssues(user?.role || undefined)
+  });
 
-  const updateStatus = async (id: string, newStatus: IssueStatus) => {
-    try {
-      const file = fileUploads[id] || undefined;
-      const updated = await updateIssueStatus(id, newStatus, file ?? undefined);
-      setIssues((prev) => prev.map((i) => (i.id === id ? updated : i)));
-      const notes = await getNotifications();
-      setNotificationsState(notes);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status, file }: { id: string; status: IssueStatus; file?: File }) => 
+      updateIssueStatus(id, status, file),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['member-issues'] })
+  });
 
   const stats = [
     { label: "Total Complaints", value: issues.length, icon: BarChart3, color: "text-primary", bg: "bg-primary/10" },
@@ -64,7 +50,15 @@ export default function MemberDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-heading font-bold mb-6">Member Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-heading font-bold">Member Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">Logged in as <b>{user?.name}</b> ({user?.role})</span>
+          <Button variant="outline" size="sm" onClick={logout}>
+            <LogOut className="h-4 w-4 mr-2" /> Logout
+          </Button>
+        </div>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -122,7 +116,8 @@ export default function MemberDashboard() {
                     <td className="p-3">
                       <Select
                         value={issue.status}
-                        onValueChange={(v) => updateStatus(issue.id, v as IssueStatus)}
+                        onValueChange={(v) => statusMutation.mutate({ id: issue.id, status: v as IssueStatus, file: fileUploads[issue.id] || undefined })}
+                        disabled={statusMutation.isPending}
                       >
                         <SelectTrigger className="h-8 w-32 text-xs">
                           <SelectValue />

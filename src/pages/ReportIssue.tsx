@@ -6,17 +6,53 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Upload, MapPin, CheckCircle2, ImageIcon } from "lucide-react";
+import { Upload, MapPin, CheckCircle2, ImageIcon, Loader2 } from "lucide-react";
 import type { IssueType } from "@/data/mockData";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMutation } from "@tanstack/react-query";
+import { reportIssue } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function ReportIssue() {
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  
+  const [type, setType] = useState<IssueType | "">("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const reportMutation = useMutation({
+    mutationFn: (formData: FormData) => reportIssue(formData),
+    onSuccess: (data) => {
+      setSubmittedId(data.id);
+      toast.success("Issue reported successfully!");
+    },
+    onError: (err) => {
+      toast.error("Failed to report issue");
+      console.error(err);
+    }
+  });
+
+  const handleSubmit = () => {
+    if (!type || !location || !description) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("type", type);
+    formData.append("location", location);
+    formData.append("description", description);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+    reportMutation.mutate(formData);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -38,7 +74,7 @@ export default function ReportIssue() {
     <Layout>
       <div className="container mx-auto px-6 py-24 relative">
         <AnimatePresence mode="wait">
-          {submitted ? (
+          {submittedId ? (
             <motion.div 
               key="success"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -57,11 +93,15 @@ export default function ReportIssue() {
               </motion.div>
               <h1 className="text-5xl font-heading font-medium text-foreground tracking-tight">Issue Reported</h1>
               <p className="text-xl text-muted-foreground max-w-md leading-relaxed">
-                Your complaint is registered under ID <strong className="text-foreground border-b border-foreground/30 font-medium">CIV-1007</strong>.
+                Your complaint is registered under ID <strong className="text-foreground border-b border-foreground/30 font-medium">{submittedId}</strong>.
               </p>
               <Button size="lg" className="mt-8 rounded-full hover:scale-105 transition-transform duration-300" onClick={() => {
-                setSubmitted(false);
+                setSubmittedId(null);
                 setPreview(null);
+                setImageFile(null);
+                setType("");
+                setLocation("");
+                setDescription("");
               }}>
                 Report Another
               </Button>
@@ -119,7 +159,7 @@ export default function ReportIssue() {
                     {/* Issue type */}
                     <div className="space-y-4">
                       <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Category</Label>
-                      <Select>
+                      <Select value={type} onValueChange={(val) => setType(val as IssueType)}>
                         <SelectTrigger className="h-14 rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 text-base">
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
@@ -137,6 +177,8 @@ export default function ReportIssue() {
                       <div className="relative group">
                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input 
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
                           placeholder="Address or landmark" 
                           className="pl-12 h-14 rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 text-base" 
                         />
@@ -148,6 +190,8 @@ export default function ReportIssue() {
                   <div className="space-y-4">
                     <Label className="text-sm font-semibold text-foreground uppercase tracking-wider">Description</Label>
                     <Textarea 
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                       placeholder="Add specific details..." 
                       rows={5} 
                       className="rounded-xl bg-background/50 border-border/50 focus:ring-primary focus:ring-offset-0 resize-none text-base p-4"
@@ -157,9 +201,10 @@ export default function ReportIssue() {
                   <Button 
                     size="lg" 
                     className="w-full h-16 text-lg rounded-xl shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 font-medium tracking-wide mt-4" 
-                    onClick={() => setSubmitted(true)}
+                    onClick={handleSubmit}
+                    disabled={reportMutation.isPending}
                   >
-                    Submit Report
+                    {reportMutation.isPending ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Submitting...</> : "Submit Report"}
                   </Button>
                 </CardContent>
               </Card>
