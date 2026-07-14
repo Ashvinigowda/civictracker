@@ -5,12 +5,15 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const rateLimit = require('express-rate-limit');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const Issue = require('./models/Issue');
 const User = require('./models/User');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy for rate limiter
+
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
@@ -104,21 +107,18 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// YOLO classification helper
-async function classifyDescriptionWithAI(description) {
-  try {
-    const response = await axios.post('http://localhost:5001/classify', 
-      { description },
-      { timeout: 10000 }
-    );
-
-    console.log('✅ AI Classification Response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ AI classification error:', error.message);
-    return { issue_type: 'Other', confidence: 0, error: error.message };
-  }
-}
+// Proxy YOLO service API
+app.use(
+  '/api/yolo', 
+  writeLimiter, // Apply rate limiter directly to the proxy to protect AI service
+  createProxyMiddleware({ 
+    target: 'http://localhost:5001', 
+    changeOrigin: true,
+    pathRewrite: {
+      '^/api/yolo': '', // Strip /api/yolo prefix before forwarding
+    },
+  })
+);
 
 // Transform MongoDB document to frontend format
 function transformIssue(doc) {
@@ -251,16 +251,6 @@ app.post('/api/issues', writeLimiter, upload.single('image'), async (req, res) =
     if (req.file) {
       const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
       issueData.image = imageUrl;
-
-      // Auto-classify issue description via AI if requested and no type provided
-      if (autoClassify === 'true' && (!type || type === 'Other')) {
-        const classification = await classifyDescriptionWithAI(description);
-
-        if (classification.issue_type && classification.issue_type !== 'Other') {
-          issueData.type = classification.issue_type;
-          console.log(`AI classified description as: ${classification.issue_type} (confidence: ${classification.confidence})`);
-        }
-      }
     }
 
     console.log('Creating issue with data:', issueData);
