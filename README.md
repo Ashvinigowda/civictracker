@@ -8,7 +8,11 @@
 ![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?logo=shadcnui&logoColor=white)
 ![React Router](https://img.shields.io/badge/React_Router-CA4245?logo=react-router&logoColor=white)
 ![Zod](https://img.shields.io/badge/Zod-3E67B1?logo=zod&logoColor=white)
-
+![Node.js](https://img.shields.io/badge/Node.js-43853D?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-%23000.svg?logo=flask&logoColor=white)
 > **Empowering citizens to report, track, and resolve civic issues — transparently.**
 
 CivicTrack AI is a modern civic engagement platform that bridges the gap between citizens and local authorities. Citizens can report infrastructure issues with photos, track their complaints in real time, and view all reported issues on a public map — all powered by an AI-assisted categorization pipeline.
@@ -146,24 +150,17 @@ civictrack-ai/
 
 ---
 
+## System Architecture
+
+![System Architecture](public/CivicTracker-System-Architecture.png)
+
+> **Note**: An editable version of this architecture diagram is available at [`public/raw-editiable-system-architecture.excalidraw`](public/raw-editiable-system-architecture.excalidraw). You can open it in [Excalidraw](https://excalidraw.com/) to edit.
+
+---
+
 ## How It Works
 
-```
-Citizen                  CivicTrack AI               Authority
-   │                           │                          │
-   │  Upload photo + details   │                          │
-   │──────────────────────────>│                          │
-   │                           │  AI categorizes issue    │
-   │                           │─────────────────────>    │
-   │  Complaint ID returned    │                          │
-   │<──────────────────────────│  Assigns to department   │
-   │                           │─────────────────────────>│
-   │  Track status via ID      │                          │
-   │──────────────────────────>│  Updates status          │
-   │                           │<─────────────────────────│
-   │  View resolved status     │                          │
-   │<──────────────────────────│                          │
-```
+
 
 1. **Report** — A citizen spots an issue and submits it with a photo, type, and location.
 2. **Detect** — The AI pipeline analyzes the image and auto-categorizes the problem.
@@ -196,13 +193,6 @@ npm run test:watch
 
 Tests are located in `src/test/` and use [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
 
----
-
-## License
-
-This project is licensed under the **[MIT License](./LICENCE)** — see the [`LICENCE`](./LICENCE) file for full details.
-
----
 
 ## Contributing
 
@@ -214,8 +204,13 @@ Contributions, bug reports, and feature requests are welcome!
 4. Push to your branch: `git push origin feature/your-feature-name`
 5. Open a Pull Request
 
----
+## License
+
+This project is licensed under the **[MIT License](./LICENCE)** — see the [`LICENCE`](./LICENCE) file for full details.
+
 
 <div align="center">
   <sub>Built with ❤️ to make cities better, one report at a time.</sub>
 </div>
+
+---

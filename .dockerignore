@@ -1,0 +1,11 @@
+node_modules
+server/node_modules
+yolo-service/venv
+yolo-service/__pycache__
+dist
+.git
+.env
+.github
+.agents
+.claude
+*.log

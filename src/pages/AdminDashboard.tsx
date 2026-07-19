@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockIssues, notifications, type CivicIssue, type IssueStatus } from "@/data/mockData";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getIssues, updateIssueStatus, assignIssue, getNotifications, type CivicIssue, type IssueStatus } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Shield,
   LayoutDashboard,
@@ -32,12 +34,30 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminDashboard() {
-  const [issues, setIssues] = useState<CivicIssue[]>([...mockIssues]);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const queryClient = useQueryClient();
+  const { logout, user } = useAuth();
 
-  const updateStatus = (id: string, status: IssueStatus) => {
-    setIssues((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
-  };
+  const { data: issues = [], isLoading: issuesLoading } = useQuery({
+    queryKey: ['admin-issues'],
+    queryFn: () => getIssues()
+  });
+
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['admin-notifications'],
+    queryFn: getNotifications,
+    refetchInterval: 30000 // Poll every 30s
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: IssueStatus }) => updateIssueStatus(id, status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-issues'] })
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: ({ id, role }: { id: string; role: string }) => assignIssue(id, role),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-issues'] })
+  });
 
   const stats = [
     { label: "Total Complaints", value: issues.length, icon: BarChart3, color: "text-primary", bg: "bg-primary/10" },
@@ -70,12 +90,13 @@ export default function AdminDashboard() {
             </button>
           ))}
         </nav>
-        <div className="p-3 border-t border-sidebar-border">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground">
-              <LogOut className="mr-2 h-4 w-4" /> Back to Site
-            </Button>
-          </Link>
+        <div className="p-3 border-t border-sidebar-border space-y-2">
+          <div className="px-3 py-2 text-sm text-sidebar-foreground/70 truncate">
+            Logged in as <b>{user?.name}</b>
+          </div>
+          <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground" onClick={logout}>
+            <LogOut className="mr-2 h-4 w-4" /> Logout
+          </Button>
         </div>
       </aside>
 
@@ -132,7 +153,8 @@ export default function AdminDashboard() {
                           <th className="text-left p-3 font-medium text-muted-foreground hidden md:table-cell">Location</th>
                           <th className="text-left p-3 font-medium text-muted-foreground hidden sm:table-cell">Date</th>
                           <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
-                          <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
+                          <th className="text-left p-3 font-medium text-muted-foreground">Status Action</th>
+                          <th className="text-left p-3 font-medium text-muted-foreground">Assign To</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -150,7 +172,8 @@ export default function AdminDashboard() {
                             <td className="p-3">
                               <Select
                                 value={issue.status}
-                                onValueChange={(v) => updateStatus(issue.id, v as IssueStatus)}
+                                onValueChange={(v) => statusMutation.mutate({ id: issue.id, status: v as IssueStatus })}
+                                disabled={statusMutation.isPending}
                               >
                                 <SelectTrigger className="h-8 w-32 text-xs">
                                   <SelectValue />
@@ -159,6 +182,24 @@ export default function AdminDashboard() {
                                   {(["Reported", "Assigned", "In Progress", "Resolved"] as IssueStatus[]).map((s) => (
                                     <SelectItem key={s} value={s}>{s}</SelectItem>
                                   ))}
+                                </SelectContent>
+                              </Select>
+                            </td>
+                            <td className="p-3">
+                              <Select
+                                value={issue.assignedTo || "unassigned"}
+                                onValueChange={(v) => assignMutation.mutate({ id: issue.id, role: v })}
+                                disabled={assignMutation.isPending}
+                              >
+                                <SelectTrigger className="h-8 w-32 text-xs">
+                                  <SelectValue placeholder="Assign" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                                  <SelectItem value="PWD">PWD</SelectItem>
+                                  <SelectItem value="SANITATION">Sanitation</SelectItem>
+                                  <SelectItem value="WATER">Water Dept</SelectItem>
+                                  <SelectItem value="ELECTRICITY">Electricity</SelectItem>
                                 </SelectContent>
                               </Select>
                             </td>
