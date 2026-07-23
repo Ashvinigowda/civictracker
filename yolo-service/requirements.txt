@@ -3,6 +3,6 @@ flask-cors==6.0.5
 torch>=2.0.0
 torchvision>=0.28.0
 ultralytics>=8.4.94
-opencv-python>=4.8.0
+opencv-python>=5.0.0.93
 Pillow>=10.0.0
 numpy>=2.0.0,<3.0.0
