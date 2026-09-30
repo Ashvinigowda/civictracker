@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pnpm for frontend
-RUN npm install -g pnpm
+# Install pnpm for frontend (pinned to match package.json)
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
 
@@ -28,12 +28,12 @@ RUN cd server && npm install
 
 # 3. Setup Frontend (React / Vite)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 # Copy frontend source files
 COPY vite.config.ts tailwind.config.ts postcss.config.js tsconfig*.json components.json eslint.config.js index.html ./
 COPY public ./public
 COPY src ./src
-# Install dependencies and build
-RUN pnpm install
+# Build frontend
 RUN pnpm run build
 
 # 4. Copy the rest of the application code
